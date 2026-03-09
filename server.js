@@ -14,20 +14,33 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Render + Vercel üçün CORS
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://layapp.onrender.com'
 ].filter(Boolean);
 
-io = socketIo(server, {
+// ✅ FIX: const io — əvvəl var/const yox idi, global leak olurdu
+const io = socketIo(server, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   },
 });
+
+// ✅ FIX: OPTIONS preflight request-lərini handle et
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -43,7 +56,6 @@ app.use(cors({
 app.use(express.json());
 app.use('/api', apiRoutes);
 
-// Health check — Render bunu ping edir
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 io.on('connection', (socket) => {
