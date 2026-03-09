@@ -18,7 +18,8 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://layapp.onrender.com'
+  'https://layapp.onrender.com',
+  'https://layapp.vercel.app' // 👈 Bunu mütləq əlavə et
 ].filter(Boolean);
 
 // ✅ FIX: const io — əvvəl var/const yox idi, global leak olurdu
